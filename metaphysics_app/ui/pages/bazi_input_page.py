@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from PySide6.QtCore import QDateTime, Signal
+from PySide6.QtCore import QDateTime, QLocale, Signal
+from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -22,8 +23,12 @@ from metaphysics_app.ui.components import page_title, primary_button
 class BaziInputPage(QWidget):
     generate_requested = Signal(object)
 
-    def __init__(self) -> None:
+    def __init__(
+        self, default_timezone: str = DEFAULT_TIMEZONE, default_true_solar_time: bool = True
+    ) -> None:
         super().__init__()
+        self.default_timezone = default_timezone
+        self.default_true_solar_time = default_true_solar_time
         layout = QVBoxLayout(self)
         layout.setContentsMargins(32, 28, 32, 28)
         layout.setSpacing(16)
@@ -46,13 +51,21 @@ class BaziInputPage(QWidget):
 
         self.longitude_input = QLineEdit()
         self.longitude_input.setPlaceholderText("例如：121.47，可留空")
+        longitude_validator = QDoubleValidator(-180.0, 180.0, 6, self)
+        longitude_validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        longitude_validator.setLocale(QLocale.c())
+        self.longitude_input.setValidator(longitude_validator)
         form.addRow("经度", self.longitude_input)
 
         self.latitude_input = QLineEdit()
         self.latitude_input.setPlaceholderText("例如：31.23，可留空")
+        latitude_validator = QDoubleValidator(-90.0, 90.0, 6, self)
+        latitude_validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        latitude_validator.setLocale(QLocale.c())
+        self.latitude_input.setValidator(latitude_validator)
         form.addRow("纬度", self.latitude_input)
 
-        self.timezone_input = QLineEdit(DEFAULT_TIMEZONE)
+        self.timezone_input = QLineEdit(default_timezone)
         form.addRow("时区", self.timezone_input)
 
         self.gender_combo = QComboBox()
@@ -63,7 +76,7 @@ class BaziInputPage(QWidget):
         form.addRow("性别", self.gender_combo)
 
         self.true_solar_checkbox = QCheckBox("启用真太阳时修正")
-        self.true_solar_checkbox.setChecked(True)
+        self.true_solar_checkbox.setChecked(default_true_solar_time)
         form.addRow("修正", self.true_solar_checkbox)
         layout.addLayout(form)
 
@@ -102,8 +115,18 @@ class BaziInputPage(QWidget):
         return float(value)
 
     def _clear(self) -> None:
+        self.datetime_edit.setDateTime(QDateTime.currentDateTime())
+        self.calendar_combo.setCurrentIndex(0)
         self.birthplace_input.clear()
         self.longitude_input.clear()
         self.latitude_input.clear()
-        self.timezone_input.setText(DEFAULT_TIMEZONE)
-        self.true_solar_checkbox.setChecked(True)
+        self.timezone_input.setText(self.default_timezone)
+        self.gender_combo.setCurrentIndex(0)
+        self.true_solar_checkbox.setChecked(self.default_true_solar_time)
+
+    def apply_defaults(self, default_timezone: str, default_true_solar_time: bool) -> None:
+        self.default_timezone = default_timezone
+        self.default_true_solar_time = default_true_solar_time
+        if not self.timezone_input.text().strip() or self.timezone_input.text() == DEFAULT_TIMEZONE:
+            self.timezone_input.setText(default_timezone)
+        self.true_solar_checkbox.setChecked(default_true_solar_time)

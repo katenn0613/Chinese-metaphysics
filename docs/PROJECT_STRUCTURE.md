@@ -50,6 +50,12 @@ Metaphysics/
         history_page.py
         profile_page.py
         settings_page.py
+  tests/
+    test_bazi_workflow.py
+    test_almanac_selector.py
+    test_ai_service.py
+    test_main.py
+    test_persistence_and_export.py
 ```
 
 ## 模块职责
@@ -61,6 +67,7 @@ Metaphysics/
 - `data`: SQLite 本地持久化。
 - `services`: 应用用例编排，例如生成排盘、保存历史、导出报告。
 - `ui`: PySide6 桌面页面和交互。
+- `tests`: 规则层、服务层、持久化、导出和 CLI smoke 覆盖。
 
 ## 扩展方式
 
@@ -74,3 +81,12 @@ ui/pages/ziwei_page.py
 ```
 
 历史记录通过 `HistoryRecord.record_type + payload` 存储模块结果，避免每个模块都重写持久化管线。
+
+## 验证入口
+
+```bash
+python -m pytest -q
+python -m ruff check metaphysics_app tests
+python -m ruff format --check metaphysics_app tests
+python -m metaphysics_app --smoke
+```

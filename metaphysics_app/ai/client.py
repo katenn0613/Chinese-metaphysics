@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -25,7 +26,9 @@ class NullLLMClient:
     model = "null"
 
     def complete(self, messages: list[ChatMessage]) -> str:
-        user_message = next((message.content for message in reversed(messages) if message.role == "user"), "")
+        user_message = next(
+            (message.content for message in reversed(messages) if message.role == "user"), ""
+        )
         return (
             "当前未配置 AI 服务。这是离线占位回复：\n"
             f"你的问题是：{user_message}\n"
@@ -55,3 +58,12 @@ class OpenAICompatibleClient:
             messages=[{"role": message.role, "content": message.content} for message in messages],
         )
         return response.choices[0].message.content or ""
+
+
+def build_default_llm_client() -> LLMClient:
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    model = os.getenv("OPENAI_MODEL", "").strip()
+    base_url = os.getenv("OPENAI_BASE_URL", "").strip() or None
+    if api_key and model:
+        return OpenAICompatibleClient(api_key=api_key, model=model, base_url=base_url)
+    return NullLLMClient()

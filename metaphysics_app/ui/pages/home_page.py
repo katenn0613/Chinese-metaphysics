@@ -25,10 +25,16 @@ class HomePage(QWidget):
 
         grid = QGridLayout()
         grid.setSpacing(14)
-        self._add_entry(grid, 0, 0, "八字排盘", "输入出生信息，生成结构化盘面。", self.open_bazi_requested)
+        self._add_entry(
+            grid, 0, 0, "八字排盘", "输入出生信息，生成结构化盘面。", self.open_bazi_requested
+        )
         self._add_entry(grid, 0, 1, "AI 问命", "基于盘面继续咨询式分析。", self.open_ai_requested)
-        self._add_entry(grid, 1, 0, "历史记录", "查看、继续分析和导出本地命例。", self.open_history_requested)
-        self._add_entry(grid, 1, 1, "黄历择日", "按用途和日期范围筛选候选日。", self.open_almanac_requested)
+        self._add_entry(
+            grid, 1, 0, "历史记录", "查看、继续分析和导出本地命例。", self.open_history_requested
+        )
+        self._add_entry(
+            grid, 1, 1, "黄历择日", "按用途和日期范围筛选候选日。", self.open_almanac_requested
+        )
         layout.addLayout(grid)
 
         watermark = BaguaWatermark()

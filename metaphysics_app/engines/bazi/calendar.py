@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from metaphysics_app.domain.models import BirthInfo, CalendarType
 from metaphysics_app.engines.bazi.constants import TIMEZONE_STANDARD_MERIDIANS
@@ -56,7 +57,7 @@ class CalendarNormalizer:
             notes.append("未提供经度，真太阳时修正已跳过。")
             return solar_datetime
 
-        standard_meridian = TIMEZONE_STANDARD_MERIDIANS.get(birth_info.timezone, 120.0)
+        standard_meridian = self._standard_meridian(birth_info.timezone, solar_datetime)
         minute_offset = round((birth_info.longitude - standard_meridian) * 4)
         notes.append(
             f"真太阳时按经度差做基础修正：标准经线 {standard_meridian}°，"
@@ -64,3 +65,15 @@ class CalendarNormalizer:
         )
         notes.append("均时差修正接口已预留，当前骨架未纳入精确天文修正。")
         return solar_datetime + timedelta(minutes=minute_offset)
+
+    def _standard_meridian(self, timezone: str, value: datetime) -> float:
+        if timezone in TIMEZONE_STANDARD_MERIDIANS:
+            return TIMEZONE_STANDARD_MERIDIANS[timezone]
+
+        zone_value = value
+        if zone_value.tzinfo is None:
+            zone_value = zone_value.replace(tzinfo=ZoneInfo(timezone))
+        offset = zone_value.utcoffset()
+        if offset is None:
+            return 120.0
+        return round(offset.total_seconds() / 3600 * 15, 2)

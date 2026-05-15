@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
+    QFormLayout,
+    QHeaderView,
     QHBoxLayout,
     QLabel,
+    QProgressBar,
     QPushButton,
     QTabWidget,
     QTableWidget,
@@ -48,8 +51,9 @@ class ResultPage(QWidget):
         layout.addLayout(actions)
 
         tabs = QTabWidget()
-        self.table = QTableWidget(4, 5)
-        self.table.setHorizontalHeaderLabels(["柱", "天干", "地支", "藏干", "五行"])
+        self.table = QTableWidget(4, 6)
+        self.table.setHorizontalHeaderLabels(["柱", "天干", "地支", "藏干", "五行", "十神"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         tabs.addTab(self.table, "基础排盘")
 
         self.beginner_text = QTextEdit()
@@ -59,6 +63,17 @@ class ResultPage(QWidget):
         self.professional_text = QTextEdit()
         self.professional_text.setReadOnly(True)
         tabs.addTab(self.professional_text, "专业术语模式")
+
+        element_widget = QWidget()
+        element_layout = QFormLayout(element_widget)
+        self.element_bars: dict[str, QProgressBar] = {}
+        for element in ["木", "火", "土", "金", "水"]:
+            bar = QProgressBar()
+            bar.setRange(0, 8)
+            bar.setTextVisible(True)
+            self.element_bars[element] = bar
+            element_layout.addRow(element, bar)
+        tabs.addTab(element_widget, "五行图表")
 
         self.chart_text = QTextEdit()
         self.chart_text.setReadOnly(True)
@@ -78,12 +93,19 @@ class ResultPage(QWidget):
                 pillar.earthly_branch,
                 " ".join(pillar.hidden_stems),
                 pillar.five_element or "",
+                pillar.ten_god or "",
             ]
             for col, value in enumerate(values):
                 self.table.setItem(row, col, QTableWidgetItem(value))
 
         self.beginner_text.setPlainText(self._interpretation_text(result.beginner_interpretation))
-        self.professional_text.setPlainText(self._interpretation_text(result.professional_interpretation))
+        self.professional_text.setPlainText(
+            self._interpretation_text(result.professional_interpretation)
+        )
+        for element, bar in self.element_bars.items():
+            value = chart.five_element_scores.get(element, 0)
+            bar.setValue(value)
+            bar.setFormat(f"{value} / 8")
         self.chart_text.setPlainText(
             "五行分布：\n"
             + "\n".join(f"{key}: {value}" for key, value in chart.five_element_scores.items())

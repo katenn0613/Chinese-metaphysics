@@ -22,8 +22,19 @@ class BaziInterpreter:
         sections = [
             InterpretationSection(
                 title="四柱结构",
-                content="、".join(f"{pillar.name}:{pillar.label}" for pillar in chart.pillars),
+                content="、".join(
+                    f"{pillar.name}:{pillar.label}({pillar.ten_god})" for pillar in chart.pillars
+                ),
                 tags=["排盘"],
+            ),
+            InterpretationSection(
+                title="十神关系",
+                content="、".join(
+                    f"{pillar.name}{pillar.heavenly_stem}:{pillar.ten_god}"
+                    for pillar in chart.pillars
+                    if pillar.ten_god
+                ),
+                tags=["十神"],
             ),
             InterpretationSection(
                 title="五行分布",
@@ -32,7 +43,7 @@ class BaziInterpreter:
             ),
             InterpretationSection(
                 title="算法状态",
-                content="当前骨架已完成结构化输出，正式论断需等待节气、十神、旺衰和格局规则补齐。",
+                content="当前已完成干支、五行、十神的基础结构化输出；旺衰、格局和大运仍待补齐。",
                 tags=["校验"],
             ),
         ]
@@ -43,7 +54,7 @@ class BaziInterpreter:
             sections=sections,
             generator_version=self.generator_version,
             follow_up_questions=["是否需要分析日主强弱？", "是否需要加入大运流年？"],
-            confidence_notes=["月柱、日柱、时柱仍为占位算法，当前解释只适合验证产品流程。"],
+            confidence_notes=["月柱仍使用近似节气边界，当前解释不替代正式命理校验。"],
         )
 
     def _beginner(self, chart: BaziChart) -> InterpretationResult:
@@ -60,6 +71,15 @@ class BaziInterpreter:
                 tags=["五行"],
             ),
             InterpretationSection(
+                title="十神关系",
+                content="、".join(
+                    f"{pillar.name}的天干是{pillar.heavenly_stem}，对应{pillar.ten_god}"
+                    for pillar in chart.pillars
+                    if pillar.ten_god
+                ),
+                tags=["十神"],
+            ),
+            InterpretationSection(
                 title="下一步可以问 AI",
                 content="你可以围绕性格倾向、阶段选择、学习方向等提出具体问题。",
                 tags=["AI"],
@@ -72,7 +92,7 @@ class BaziInterpreter:
             sections=sections,
             generator_version=self.generator_version,
             follow_up_questions=["我适合从哪个角度理解这个盘？", "这个盘的五行分布怎么读？"],
-            confidence_notes=["当前为产品骨架说明，不能作为正式命理结论。"],
+            confidence_notes=["当前为基础规则说明，不能作为正式命理结论。"],
         )
 
     def _score_text(self, scores: dict[str, int]) -> str:

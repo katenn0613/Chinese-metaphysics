@@ -11,4 +11,3 @@ DEFAULT_TIMEZONE = "Asia/Shanghai"
 DEFAULT_DATA_DIR = Path.home() / ".chinese_metaphysics"
 DEFAULT_DATABASE_PATH = DEFAULT_DATA_DIR / "metaphysics.sqlite3"
 DEFAULT_EXPORT_DIR = DEFAULT_DATA_DIR / "exports"
-

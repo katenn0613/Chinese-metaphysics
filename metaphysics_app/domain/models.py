@@ -7,6 +7,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any
 from uuid import uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 class CalendarType(str, Enum):
@@ -50,6 +51,27 @@ class BirthInfo:
     longitude: float | None = None
     latitude: float | None = None
 
+    def __post_init__(self) -> None:
+        if isinstance(self.calendar_type, str):
+            self.calendar_type = CalendarType(self.calendar_type)
+        if isinstance(self.gender, str):
+            self.gender = Gender(self.gender)
+        if not isinstance(self.birth_datetime, datetime):
+            raise ValueError("出生时间必须是 datetime 类型。")
+        if not isinstance(self.timezone, str):
+            raise ValueError("时区必须是字符串。")
+        self.timezone = self.timezone.strip()
+        if not self.timezone:
+            raise ValueError("时区不能为空。")
+        try:
+            ZoneInfo(self.timezone)
+        except ZoneInfoNotFoundError as exc:
+            raise ValueError(f"无法识别时区：{self.timezone}") from exc
+        if self.longitude is not None and not -180 <= self.longitude <= 180:
+            raise ValueError("经度必须在 -180 到 180 之间。")
+        if self.latitude is not None and not -90 <= self.latitude <= 90:
+            raise ValueError("纬度必须在 -90 到 90 之间。")
+
 
 @dataclass(slots=True)
 class UserProfile:
@@ -61,6 +83,13 @@ class UserProfile:
     id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self) -> None:
+        self.display_name = self.display_name.strip()
+        if not self.display_name:
+            raise ValueError("用户资料姓名不能为空。")
+        if isinstance(self.gender, str):
+            self.gender = Gender(self.gender)
 
 
 @dataclass(slots=True)
@@ -161,6 +190,13 @@ class HistoryRecord:
     id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
+
+    def __post_init__(self) -> None:
+        if isinstance(self.record_type, str):
+            self.record_type = HistoryRecordType(self.record_type)
+        self.title = self.title.strip()
+        if not self.title:
+            raise ValueError("历史记录标题不能为空。")
 
 
 @dataclass(slots=True)

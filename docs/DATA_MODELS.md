@@ -48,6 +48,7 @@ UI 展示字段：
 - `pillars`
 - `day_master`
 - `five_element_scores`
+- `yin_yang_scores`
 - `calculation_notes`
 - `algorithm_version`
 - `created_at`
@@ -56,7 +57,7 @@ UI 展示字段：
 
 - `solar_terms`
 - `hidden_stems`
-- `ten_gods`
+- `ten_gods`（当前已写入各柱天干关系）
 - `luck_cycles`
 - `void_branches`
 
@@ -168,3 +169,31 @@ UI 展示字段：
 
 - `progress_label`
 - `open_file_action`
+
+## 9. AppSettings
+
+当前 SQLite 表：`app_settings`
+
+本地存储字段：
+
+- `key`
+- `value_json`
+- `updated_at`
+
+当前已使用设置：
+
+- `default_timezone`
+- `default_true_solar_time`
+
+## 10. SQLite Tables
+
+当前 schema：
+
+- `history_records`
+- `app_settings`
+- `user_profiles`
+
+当前索引：
+
+- `idx_history_records_recent`
+- `idx_user_profiles_recent`

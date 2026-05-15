@@ -14,10 +14,14 @@ SYSTEM_PROMPT = """
 
 
 def build_bazi_context(chart: BaziChart, interpretation: InterpretationResult | None) -> str:
-    pillars = " / ".join(f"{pillar.name}:{pillar.label}" for pillar in chart.pillars)
+    pillars = " / ".join(
+        f"{pillar.name}:{pillar.label}({pillar.ten_god})" for pillar in chart.pillars
+    )
     sections = ""
     if interpretation:
-        sections = "\n".join(f"- {section.title}: {section.content}" for section in interpretation.sections)
+        sections = "\n".join(
+            f"- {section.title}: {section.content}" for section in interpretation.sections
+        )
 
     return f"""
 排盘ID: {chart.id}
